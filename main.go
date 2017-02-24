@@ -3,11 +3,13 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 )
 
 const (
@@ -16,16 +18,27 @@ const (
 )
 
 func main() {
-	city := "Krakow,pl"
+	log.SetFlags(0)
+	log.SetPrefix("pogoda: ")
+
+	flag.Usage = usage
+	flag.Parse()
+
+	if flag.NArg() < 1 {
+		log.Print("brakuje nazwy miasta")
+		usage()
+		os.Exit(1)
+	}
+	city := flag.Arg(0)
 
 	// Utworzenie URLa z zapytaniem
 	query := url.Values{
-		"q":     {city},
 		"appid": {serviceApiKey},
+		"q":     {city},
 	}
 	urlStr := serviceURL + "?" + query.Encode()
 
-	log.Printf("url: %s\n", urlStr) // debug
+	fmt.Printf("[debug] url: %s\n", urlStr) // debug
 
 	// Request HTTP
 	resp, err := http.Get(urlStr)
@@ -43,3 +56,11 @@ func main() {
 	// Wydruk zwróconych danych
 	fmt.Printf("%s\n", data)
 }
+
+// usage drukuje na stderr sposób użycia programu.
+func usage() {
+	fmt.Fprint(os.Stderr, usageStr)
+}
+
+const usageStr = `Sposób użycia: pogoda miasto
+`
