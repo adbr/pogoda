@@ -56,3 +56,50 @@ Utworzenie repozytorium: github.com/adbr/pogoda
   to zwrócenia błędu - widocznie ten serwer akceptuje takie URLe.
 
 - pakiet net/url zawiera funkcje do escape'owania URLi
+
+* Result
+
+Przykładowy wynik:
+
+{
+    "coord": {
+        "lon": 19.92,
+        "lat": 50.08
+    },
+    "weather": [
+        {
+            "id": 803,
+            "main": "Clouds",
+            "description": "broken clouds",
+            "icon": "04n"
+        }
+    ],
+    "base": "stations",
+    "main": {
+        "temp": 275.15,
+        "pressure": 1008,
+        "humidity": 80,
+        "temp_min": 275.15,
+        "temp_max": 275.15
+    },
+    "visibility": 10000,
+    "wind": {
+        "speed": 1,
+        "deg": 190
+    },
+    "clouds": {
+        "all": 75
+    },
+    "dt": 1488405600,
+    "sys": {
+        "type": 1,
+        "id": 5352,
+        "message": 0.0436,
+        "country": "PL",
+        "sunrise": 1488345701,
+        "sunset": 1488385441
+    },
+    "id": 3094802,
+    "name": "Krakow",
+    "cod": 200
+}
