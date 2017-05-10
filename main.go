@@ -76,8 +76,8 @@ type WeatherResult struct {
 		Country     string
 		SunriseUnix int64 `json:"sunrise"`
 		SunsetUnix  int64 `json:"sunset"`
-		Sunrise     time.Time
-		Sunset      time.Time
+		SunriseTime string
+		SunsetTime  string
 	}
 }
 
@@ -106,8 +106,9 @@ func getWeather(city string) (*WeatherResult, error) {
 	if err != nil {
 		return nil, err
 	}
-	result.Sys.Sunrise = time.Unix(result.Sys.SunriseUnix, 0)
-	result.Sys.Sunset = time.Unix(result.Sys.SunsetUnix, 0)
+	l := "15:04:05 MST"
+	result.Sys.SunriseTime = time.Unix(result.Sys.SunriseUnix, 0).Format(l)
+	result.Sys.SunsetTime = time.Unix(result.Sys.SunsetUnix, 0).Format(l)
 	return result, nil
 }
 
@@ -117,9 +118,9 @@ Ciśnienie:     {{.Main.Pressure}} hpa
 Wilgotność:    {{.Main.Humidity}} %
 Wiatr:         {{.Wind.Speed}} m/s
 Zachmurzenie:  {{.Clouds.All}} %
-Wschód słońca: {{.Sys.Sunrise}}
-Zachód słońca: {{.Sys.Sunset}}
-[Dane pochodzą z serwisu OpenWeatherMap]
+Wschód słońca: {{.Sys.SunriseTime}}
+Zachód słońca: {{.Sys.SunsetTime}}
+(Dane pochodzą z serwisu OpenWeatherMap.com)
 `
 
 var templ = template.Must(template.New("weather").Parse(templStr))
