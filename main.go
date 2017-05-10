@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -41,7 +42,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = printWeather(weather)
+	err = printWeather(os.Stdout, weather)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -123,8 +124,8 @@ Zachód słońca: {{.Sys.Sunset}}
 
 var templ = template.Must(template.New("weather").Parse(templStr))
 
-func printWeather(weather *WeatherResult) error {
-	err := templ.Execute(os.Stdout, weather)
+func printWeather(out io.Writer, weather *WeatherResult) error {
+	err := templ.Execute(out, weather)
 	if err != nil {
 		return err
 	}
