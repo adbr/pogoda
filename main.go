@@ -59,30 +59,48 @@ func usage() {
 	fmt.Fprintf(os.Stderr, "%s\n", s)
 }
 
-const helpStr = `Program pogoda wyświetla dane pogodowe dla podanego miasta.
+// getWeather zwraca dane pogodowe dla miasta city. Dane są pobierane
+// z serwisu openweathermap.org.
+func getWeather(city string) (*WeatherResult, error) {
+	query := url.Values{
+		"appid": {serviceApiKey},
+		"units": {"metric"},
+		"q":     {city},
+	}
+	resp, err := http.Get(serviceURL + "?" + query.Encode())
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
 
-Sposób użycia:
-	pogoda [-h] miasto
+	// Wczytanie zwróconych danych w formacie JSON.
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
 
-	-h Wyświetla help.
+	// Dekodowanie JSONa.
+	result := new(WeatherResult)
+	err = json.Unmarshal(data, result)
+	if err != nil {
+		return nil, err
+	}
+	l := "15:04:05 MST" // format czasu
+	result.Sys.SunriseTime = time.Unix(result.Sys.SunriseUnix, 0).Format(l)
+	result.Sys.SunsetTime = time.Unix(result.Sys.SunsetUnix, 0).Format(l)
 
-Dla podanego miasta program pobiera aktualne dane pogodowe z serwisu
-http://api.openweathermap.org i wyświetla je na standardowe wyjście.
+	return result, nil
+}
 
-Przykład: pogoda dla Warszawy:
-
-	$ pogoda Warszawa
-	Miasto:        Warszawa, PL [52.24, 21.04]
-	Temperatura:   21 °C (min: 21, max: 21)
-	Pogoda:        Clear (clear sky)
-	Ciśnienie:     1023 hpa
-	Wilgotność:    40 %
-	Wiatr:         2.6 m/s (0°)
-	Zachmurzenie:  0 %
-	Wschód słońca: 04:24:40 CEST
-	Zachód słońca: 20:42:16 CEST
-	(Dane pochodzą z serwisu OpenWeatherMap.com)
-`
+// printWeather drukuje do out dane pogodowe sformatowane przy użyciu
+// template'u.
+func printWeather(out io.Writer, weather *WeatherResult) error {
+	err := templ.Execute(out, weather)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
 // Typ WeatherResult representuje dane pogodowe.
 type WeatherResult struct {
@@ -128,39 +146,6 @@ type WeatherResult struct {
 	Cod  int
 }
 
-// getWeather zwraca dane pogodowe dla miasta city. Dane są pobierane
-// z serwisu openweathermap.org.
-func getWeather(city string) (*WeatherResult, error) {
-	query := url.Values{
-		"appid": {serviceApiKey},
-		"units": {"metric"},
-		"q":     {city},
-	}
-	resp, err := http.Get(serviceURL + "?" + query.Encode())
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	// Wczytanie zwróconych danych w formacie JSON.
-	data, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	// Dekodowanie JSONa.
-	result := new(WeatherResult)
-	err = json.Unmarshal(data, result)
-	if err != nil {
-		return nil, err
-	}
-	l := "15:04:05 MST" // format czasu
-	result.Sys.SunriseTime = time.Unix(result.Sys.SunriseUnix, 0).Format(l)
-	result.Sys.SunsetTime = time.Unix(result.Sys.SunsetUnix, 0).Format(l)
-
-	return result, nil
-}
-
 // templStr jest templatem dla wyświetlania danych pogodowych typu
 // WeatherResult.
 const templStr = `Miasto:	       {{.Name}}, {{.Sys.Country}} [{{.Coord.Lat}}, {{.Coord.Lon}}]
@@ -179,12 +164,27 @@ Zachód słońca: {{.Sys.SunsetTime}}
 
 var templ = template.Must(template.New("weather").Parse(templStr))
 
-// printWeather drukuje do out dane pogodowe sformatowane przy użyciu
-// template'u.
-func printWeather(out io.Writer, weather *WeatherResult) error {
-	err := templ.Execute(out, weather)
-	if err != nil {
-		return err
-	}
-	return nil
-}
+const helpStr = `Program pogoda wyświetla dane pogodowe dla podanego miasta.
+
+Sposób użycia:
+	pogoda [-h] miasto
+
+	-h Wyświetla help.
+
+Dla podanego miasta program pobiera aktualne dane pogodowe z serwisu
+http://api.openweathermap.org i wyświetla je na standardowe wyjście.
+
+Przykład: pogoda dla Warszawy:
+
+	$ pogoda Warszawa
+	Miasto:        Warszawa, PL [52.24, 21.04]
+	Temperatura:   21 °C (min: 21, max: 21)
+	Pogoda:        Clear (clear sky)
+	Ciśnienie:     1023 hpa
+	Wilgotność:    40 %
+	Wiatr:         2.6 m/s (0°)
+	Zachmurzenie:  0 %
+	Wschód słońca: 04:24:40 CEST
+	Zachód słońca: 20:42:16 CEST
+	(Dane pochodzą z serwisu OpenWeatherMap.com)
+`
