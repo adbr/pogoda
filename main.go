@@ -1,7 +1,6 @@
 // 2017-02-04 adbr
 
-// TODO: pakiet dla openweathermap?
-
+// Program pogoda wyświetla dane pogodowe dla podanego miasta.
 package main
 
 import (
@@ -27,8 +26,15 @@ func main() {
 	log.SetFlags(0)
 	log.SetPrefix("pogoda: ")
 
+	h := flag.Bool("h", false, "Wyświetla help")
+
 	flag.Usage = usage
 	flag.Parse()
+
+	if *h {
+		fmt.Print(helpStr)
+		os.Exit(0)
+	}
 
 	if flag.NArg() < 1 {
 		usage()
@@ -47,15 +53,38 @@ func main() {
 	}
 }
 
-const usageStr = `Sposób użycia: pogoda miasto
-`
-
 // usage drukuje na stderr sposób użycia programu.
 func usage() {
-	fmt.Fprint(os.Stderr, usageStr)
+	const s = "Sposób użycia: pogoda [-h] miasto"
+	fmt.Fprintf(os.Stderr, "%s\n", s)
 }
 
-// Typ WeatherResult representuje dane pogodowe zdekodowane z JSONa.
+const helpStr = `Program pogoda wyświetla dane pogodowe dla podanego miasta.
+
+Sposób użycia:
+	pogoda [-h] miasto
+
+	-h Wyświetla help.
+
+Dla podanego miasta program pobiera aktualne dane pogodowe z serwisu
+http://api.openweathermap.org i wyświetla je na standardowe wyjście.
+
+Przykład: pogoda dla Warszawy:
+
+	$ pogoda Warszawa
+	Miasto:        Warszawa, PL [52.24, 21.04]
+	Temperatura:   21 °C (min: 21, max: 21)
+	Pogoda:        Clear (clear sky)
+	Ciśnienie:     1023 hpa
+	Wilgotność:    40 %
+	Wiatr:         2.6 m/s (0°)
+	Zachmurzenie:  0 %
+	Wschód słońca: 04:24:40 CEST
+	Zachód słońca: 20:42:16 CEST
+	(Dane pochodzą z serwisu OpenWeatherMap.com)
+`
+
+// Typ WeatherResult representuje dane pogodowe.
 type WeatherResult struct {
 	Coord struct {
 		Lat float64 // city geo location, latitude
@@ -99,7 +128,8 @@ type WeatherResult struct {
 	Cod  int
 }
 
-// getWeather zwraca pogodę dla miasta city.
+// getWeather zwraca dane pogodowe dla miasta city. Dane są pobierane
+// z serwisu openweathermap.org.
 func getWeather(city string) (*WeatherResult, error) {
 	query := url.Values{
 		"appid": {serviceApiKey},
@@ -124,12 +154,15 @@ func getWeather(city string) (*WeatherResult, error) {
 	if err != nil {
 		return nil, err
 	}
-	l := "15:04:05 MST"
+	l := "15:04:05 MST" // format czasu
 	result.Sys.SunriseTime = time.Unix(result.Sys.SunriseUnix, 0).Format(l)
 	result.Sys.SunsetTime = time.Unix(result.Sys.SunsetUnix, 0).Format(l)
+
 	return result, nil
 }
 
+// templStr jest templatem dla wyświetlania danych pogodowych typu
+// WeatherResult.
 const templStr = `Miasto:	       {{.Name}}, {{.Sys.Country}} [{{.Coord.Lat}}, {{.Coord.Lon}}]
 Temperatura:   {{.Main.Temp}} °C (min: {{.Main.TempMin}}, max: {{.Main.TempMax}})
 {{range .Weather -}}
@@ -146,6 +179,8 @@ Zachód słońca: {{.Sys.SunsetTime}}
 
 var templ = template.Must(template.New("weather").Parse(templStr))
 
+// printWeather drukuje do out dane pogodowe sformatowane przy użyciu
+// template'u.
 func printWeather(out io.Writer, weather *WeatherResult) error {
 	err := templ.Execute(out, weather)
 	if err != nil {
