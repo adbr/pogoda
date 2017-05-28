@@ -3,7 +3,7 @@
 # 2017-05-28 adbr
 
 prog=pogoda
-version=1.0
+version=1.0.1
 
 build() {
 	os=$1
