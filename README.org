@@ -1,2 +1,26 @@
 ** pogoda
-Wyświetla dane pogodowe dla podanego miasta
+
+Program pogoda wyświetla dane pogodowe dla podanego miasta.
+
+Sposób użycia:
+
+: 	pogoda [-h] miasto
+: 
+: 	-h Wyświetla help.
+
+Dla podanego miasta program pobiera aktualne dane pogodowe z serwisu
+http://api.openweathermap.org i wyświetla je na standardowe wyjście.
+
+Przykład: pogoda dla Warszawy:
+
+: 	$ pogoda Warszawa
+: 	Miasto:        Warszawa, PL [52.24, 21.04]
+: 	Temperatura:   21 °C (min: 21, max: 21)
+: 	Pogoda:        Clear (clear sky)
+: 	Ciśnienie:     1023 hpa
+: 	Wilgotność:    40 %
+: 	Wiatr:         2.6 m/s (0°)
+: 	Zachmurzenie:  0 %
+: 	Wschód słońca: 04:24:40 CEST
+: 	Zachód słońca: 20:42:16 CEST
+: 	(Dane pochodzą z serwisu OpenWeatherMap.com)
