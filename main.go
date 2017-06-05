@@ -152,7 +152,7 @@ const templStr = `Miasto:	       {{.Name}}, {{.Sys.Country}} [{{.Coord.Lat}}, {{
 Temperatura:   {{.Main.Temp}} °C (min: {{.Main.TempMin}}, max: {{.Main.TempMax}})
 {{range .Weather -}}
 Pogoda:        {{.Main}} ({{.Description}})
-{{- end}}
+{{end -}}
 Ciśnienie:     {{.Main.Pressure}} hpa
 Wilgotność:    {{.Main.Humidity}} %
 Wiatr:         {{.Wind.Speed}} m/s ({{.Wind.Deg}}°)
