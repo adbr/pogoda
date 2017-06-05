@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"text/template"
 	"time"
 )
@@ -85,9 +86,13 @@ func getWeather(city string) (*WeatherResult, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// Formatowanie danych lokalnych dla ułatwienia wyświetlania
+	// niektórych pól.
 	l := "15:04:05 MST" // format czasu
-	result.Sys.SunriseTime = time.Unix(result.Sys.SunriseUnix, 0).Format(l)
-	result.Sys.SunsetTime = time.Unix(result.Sys.SunsetUnix, 0).Format(l)
+	result.Local.SunriseTime = time.Unix(result.Sys.SunriseUnix, 0).Format(l)
+	result.Local.SunsetTime = time.Unix(result.Sys.SunsetUnix, 0).Format(l)
+	result.Local.Weather = weatherDescription(result.Weather)
 
 	return result, nil
 }
@@ -108,14 +113,9 @@ type WeatherResult struct {
 		Lat float64 // city geo location, latitude
 		Lon float64 // city geo location, longitude
 	}
-	Weather []struct {
-		Id          int
-		Main        string
-		Description string
-		Icon        string
-	}
-	Base string
-	Main struct {
+	Weather Weathers
+	Base    string
+	Main    struct {
 		Temp     float64
 		Pressure float64
 		Humidity float64
@@ -136,30 +136,55 @@ type WeatherResult struct {
 		Id          int
 		Message     float64
 		Country     string
-		SunriseUnix int64  `json:"sunrise"`
-		SunsetUnix  int64  `json:"sunset"`
-		SunriseTime string // sformatowany czas z SunriseUnix
-		SunsetTime  string // sformatowany czas z SunsetUnix
+		SunriseUnix int64 `json:"sunrise"`
+		SunsetUnix  int64 `json:"sunset"`
 	}
 	Id   int    // city id
 	Name string // city name
 	Cod  int
+
+	// Pole Local zawiera dane dodane lokalnie dla ułatwienia
+	// wyświetlania informacji.
+	Local struct {
+		SunriseTime string // sformatowany czas z SunriseUnix
+		SunsetTime  string // sformatowany czas z SunsetUnix
+		Weather     string // sformatowany opis pogody z pola Weather
+	}
+}
+
+// Weathers jest typem pola WeatherResult.Weather. Zawiera słowne
+// opisy pogody.
+type Weathers []struct {
+	Id          int
+	Main        string
+	Description string
+	Icon        string
+}
+
+// weatherDescription zwraca sformatowany opis pogody.
+func weatherDescription(w Weathers) string {
+	var a []string
+	for _, d := range w {
+		s := fmt.Sprintf("%s (%s)", d.Main, d.Description)
+		a = append(a, s)
+	}
+	return strings.Join(a, ", ")
 }
 
 // templStr jest templatem dla wyświetlania danych pogodowych typu
 // WeatherResult.
 const templStr = `Miasto:	       {{.Name}}, {{.Sys.Country}} [{{.Coord.Lat}}, {{.Coord.Lon}}]
-Temperatura:   {{.Main.Temp}} °C (min: {{.Main.TempMin}}, max: {{.Main.TempMax}})
-{{range .Weather -}}
-Pogoda:        {{.Main}} ({{.Description}})
-{{end -}}
+Temperatura:   {{.Main.Temp}} °C
+{{- if ne .Main.TempMin .Main.TempMax}} (min: {{.Main.TempMin}}, max: {{.Main.TempMax}})
+{{- end}}
+Pogoda:        {{.Local.Weather}}
 Ciśnienie:     {{.Main.Pressure}} hpa
 Wilgotność:    {{.Main.Humidity}} %
 Wiatr:         {{.Wind.Speed}} m/s ({{.Wind.Deg}}°)
 Zachmurzenie:  {{.Clouds.All}} %
-Wschód słońca: {{.Sys.SunriseTime}}
-Zachód słońca: {{.Sys.SunsetTime}}
-(Dane pochodzą z serwisu OpenWeatherMap.com)
+Wschód słońca: {{.Local.SunriseTime}}
+Zachód słońca: {{.Local.SunsetTime}}
+(Dane pochodzą z serwisu OpenWeatherMap.org)
 `
 
 var templ = template.Must(template.New("weather").Parse(templStr))
