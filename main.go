@@ -16,6 +16,8 @@ import (
 	"strings"
 	"text/template"
 	"time"
+
+	"github.com/adbr/pogoda/openweather"
 )
 
 const (
@@ -27,12 +29,13 @@ func main() {
 	log.SetFlags(0)
 	log.SetPrefix("pogoda: ")
 
-	h := flag.Bool("h", false, "Wyświetla help")
+	help := flag.Bool("h", false, "Wyświetla help")
+	days := flag.Int("d", 0, "Prognoza pogody na n dni")
 
 	flag.Usage = usage
 	flag.Parse()
 
-	if *h {
+	if *help {
 		fmt.Print(helpStr)
 		os.Exit(0)
 	}
@@ -43,20 +46,32 @@ func main() {
 	}
 	city := flag.Arg(0)
 
-	weather, err := getWeather(city)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = printWeather(os.Stdout, weather)
-	if err != nil {
-		log.Fatal(err)
+	if *days > 0 {
+		// Prognoza pogody na *days dni
+		forecast, err := openweather.GetForecast(city, *days)
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = openweather.PrintForecast(os.Stdout, forecast)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		// Pogoda na teraz
+		weather, err := getWeather(city)
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = printWeather(os.Stdout, weather)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
 // usage drukuje na stderr sposób użycia programu.
 func usage() {
-	const s = "Sposób użycia: pogoda [-h] miasto"
+	const s = "Sposób użycia: pogoda [-h] [-d days] miasto"
 	fmt.Fprintf(os.Stderr, "%s\n", s)
 }
 
@@ -178,13 +193,12 @@ Temperatura:   {{.Main.Temp}} °C
 {{- if ne .Main.TempMin .Main.TempMax}} (min: {{.Main.TempMin}}, max: {{.Main.TempMax}})
 {{- end}}
 Pogoda:        {{.Local.Weather}}
-Ciśnienie:     {{.Main.Pressure}} hpa
-Wilgotność:    {{.Main.Humidity}} %
-Wiatr:         {{.Wind.Speed}} m/s ({{.Wind.Deg}}°)
 Zachmurzenie:  {{.Clouds.All}} %
+Wiatr:         {{.Wind.Speed}} m/s ({{.Wind.Deg}}°)
+Ciśnienie:     {{.Main.Pressure}} hPa
+Wilgotność:    {{.Main.Humidity}} %
 Wschód słońca: {{.Local.SunriseTime}}
 Zachód słońca: {{.Local.SunsetTime}}
-(Dane pochodzą z serwisu OpenWeatherMap.org)
 `
 
 var templ = template.Must(template.New("weather").Parse(templStr))
@@ -192,9 +206,11 @@ var templ = template.Must(template.New("weather").Parse(templStr))
 const helpStr = `Program pogoda wyświetla dane pogodowe dla podanego miasta.
 
 Sposób użycia:
-	pogoda [-h] miasto
+	pogoda [-h] [-d days] miasto
 
-	-h Wyświetla help.
+	-h	wyświetla help
+	-d days
+		prognoza pogody na days dni (days: [1..17])
 
 Dla podanego miasta program pobiera aktualne dane pogodowe z serwisu
 http://api.openweathermap.org i wyświetla je na standardowe wyjście.
