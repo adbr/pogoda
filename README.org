@@ -2,25 +2,27 @@
 
 Program pogoda wyświetla dane pogodowe dla podanego miasta.
 
-Sposób użycia:
-
-: pogoda [-h] miasto
-: 
-: -h Wyświetla help.
+: Sposób użycia:
+: 	pogoda [opcje] miasto
+: 	-h      sposób użycia
+: 	-help   dokumentacja
+: 	-d days
+: 	        prognoza pogody na days dni (days: [1..17])
 
 Dla podanego miasta program pobiera aktualne dane pogodowe z serwisu
-http://api.openweathermap.org i wyświetla je na standardowe wyjście.
+http://api.openweathermap.org i wyświetla je na standardowe wyjście. Z
+opcją -d wyświetla prognozę pogody na maksymalnie 16 dni.
 
 Przykład: pogoda dla Warszawy:
 
-: $ pogoda Warszawa
-: Miasto:        Warszawa, PL [52.24, 21.04]
-: Temperatura:   21 °C (min: 21, max: 21)
-: Pogoda:        Clear (clear sky)
-: Ciśnienie:     1023 hpa
-: Wilgotność:    40 %
-: Wiatr:         2.6 m/s (0°)
-: Zachmurzenie:  0 %
-: Wschód słońca: 04:24:40 CEST
-: Zachód słońca: 20:42:16 CEST
-: (Dane pochodzą z serwisu OpenWeatherMap.com)
+: 	$ pogoda Warszawa
+: 	Miasto:        Warszawa, PL [52.24, 21.04]
+: 	Data:          13.10.2017 13:00:00 CEST, Piątek
+: 	Temperatura:   13 °C
+: 	Pogoda:        Clouds (broken clouds)
+: 	Zachmurzenie:  75 %
+: 	Wiatr:         7.7 m/s (290°)
+: 	Ciśnienie:     1017 hPa
+: 	Wilgotność:    66 %
+: 	Wschód słońca: 06:58:17 CEST
+: 	Zachód słońca: 17:44:40 CEST
