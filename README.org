@@ -1,4 +1,4 @@
-** pogoda
+* pogoda
 
 Program pogoda wyświetla dane pogodowe dla podanego miasta.
 
@@ -26,3 +26,12 @@ Przykład: pogoda dla Warszawy:
 : 	Wilgotność:    66 %
 : 	Wschód słońca: 06:58:17 CEST
 : 	Zachód słońca: 17:44:40 CEST
+
+** Instalacja
+
+Kompilacja:
+
+: go build
+
+lub prekompilowana binarka z:
+https://github.com/adbr/pogoda/releases
