@@ -1,33 +1,5 @@
 // 2017-02-04 adbr
 
-/*
-Program pogoda wyświetla dane pogodowe dla podanego miasta.
-
-Sposób użycia:
-	pogoda [opcje] miasto
-	-h      sposób użycia
-	-help   dokumentacja
-	-d days
-	        prognoza pogody na days dni (days: [1..17])
-
-Dla podanego miasta program pobiera aktualne dane pogodowe z serwisu
-http://api.openweathermap.org i wyświetla je na standardowe wyjście. Z
-opcją -d wyświetla prognozę pogody na maksymalnie 16 dni.
-
-Przykład: pogoda dla Warszawy:
-
-	$ pogoda Warszawa
-	Miasto:        Warszawa, PL [52.24, 21.04]
-	Data:          13.10.2017 13:00:00 CEST, Piątek
-	Temperatura:   13 °C
-	Pogoda:        Clouds (broken clouds)
-	Zachmurzenie:  75 %
-	Wiatr:         7.7 m/s (290°)
-	Ciśnienie:     1017 hPa
-	Wilgotność:    66 %
-	Wschód słońca: 06:58:17 CEST
-	Zachód słońca: 17:44:40 CEST
-*/
 package main
 
 import (
@@ -36,7 +8,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/adbr/pogoda/openweather"
+	"pogoda/openweather"
 )
 
 func main() {

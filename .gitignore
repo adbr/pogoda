@@ -1,5 +1,5 @@
 *~
 /pogoda
-build
-release
+/build/
+/release/
 TAGS

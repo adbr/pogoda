@@ -1,7 +1,7 @@
 # 2017-05-28 adbr
 
 all:
-	@echo "targets: release, tag, clean"
+	@echo "targets: release, tags, clean"
 
 release:
 	sh release.sh
