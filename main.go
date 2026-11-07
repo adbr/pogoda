@@ -55,7 +55,7 @@ func main() {
 			log.Fatal(err)
 		}
 	} else {
-		// Pogoda na teraz
+		// Prognoza pogody na teraz
 		weather, err := openweather.GetWeather(city)
 		if err != nil {
 			log.Fatal(err)
